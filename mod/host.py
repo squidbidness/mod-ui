@@ -157,8 +157,8 @@ class Host(object):
         self.pedalboard_preset   = -1
         self.pedalboard_presets  = []
         self.next_hmi_pedalboard = None
-        self.jack_hwin_prefix  = "mod-host:playback_internal_"
-        self.jack_hwout_prefix = "mod-host:capture_internal_"
+        self.jack_hwin_prefix  = "mod-host:playback_internal"
+        self.jack_hwout_prefix = "mod-host:capture_internal"
         self.jack_slave_prefix = "mod-slave"
 
         # pluginData-like pedalboard
@@ -1570,6 +1570,12 @@ class Host(object):
             if data[2].startswith("nooice_capture_"):
                 num = data[2].replace("nooice_capture_","",1)
                 return "nooice%s:nooice_capture_%s" % (num, num)
+            if data[2].startswith("playback"):
+                num = data[2][-1]
+                return "%s_%s" % (self.jack_hwin_prefix, num) 
+            if data[2].startswith("capture"):
+                num = data[2][-1]
+                return "%s_%s" % (self.jack_hwout_prefix, num) 
             return "mod-host:%s" % data[2]
 
         instance    = "/graph/%s" % data[2]
