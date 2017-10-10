@@ -456,14 +456,12 @@ JqueryClass('pedalboard', {
             if (data.hardware) {
                 var symbol
                 for (var i=1, count=data.hardware.audio_ins; i<=count; i++) {
-                    symbol = (i < 3) ? ('/graph/capture_' + i) : ('/graph/audio_from_slave_' + (i-2))
                     var hw = $('<div class="hardware-output" mod-port-index="' + i + '" title="Hardware Capture ' + i + '">')
-                    self.pedalboard('addHardwareOutput', hw, symbol, 'audio')
+                    self.pedalboard('addHardwareOutput', hw, '/graph/capture_internal_' + i, 'audio')
                 }
                 for (var i=1, count=data.hardware.audio_outs; i<=count; i++) {
-                    symbol = (i < 3) ? ('/graph/playback_' + i) : ('/graph/audio_to_slave_' + (i-2))
                     var hw = $('<div class="hardware-input" mod-port-index="' + i + '" title="Hardware Playback ' + i + '">')
-                    self.pedalboard('addHardwareInput', hw, '/graph/playback_' + i, 'audio')
+                    self.pedalboard('addHardwareInput', hw, '/graph/playback_internal_' + i, 'audio')
                 }
                 for (var i=1, count=data.hardware.cv_ins; i<=count; i++) {
                     var hw = $('<div class="hardware-output" mod-port-index="' + i + '" title="Hardware CV Capture ' + i + '">')

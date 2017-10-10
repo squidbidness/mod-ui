@@ -157,8 +157,8 @@ class Host(object):
         self.pedalboard_preset   = -1
         self.pedalboard_presets  = []
         self.next_hmi_pedalboard = None
-        self.jack_hwin_prefix  = "system:playback_"
-        self.jack_hwout_prefix = "system:capture_"
+        self.jack_hwin_prefix  = "mod-host:playback_internal_"
+        self.jack_hwout_prefix = "mod-host:capture_internal_"
         self.jack_slave_prefix = "mod-slave"
 
         # pluginData-like pedalboard
@@ -267,9 +267,6 @@ class Host(object):
         if not alias:
             return
         alias = alias.split("-",5)[-1].replace("-"," ").replace(";",".")
-
-        if not isOutput:
-            connect_jack_ports(name, "mod-host:midi_in")
 
         for i in range(len(self.midiports)):
             port_symbol, port_alias, port_conns = self.midiports[i]
@@ -888,14 +885,10 @@ class Host(object):
     # Host stuff
 
     def mute(self):
-        disconnect_jack_ports(self.jack_hwout_prefix + "1", "system:playback_1")
-        disconnect_jack_ports(self.jack_hwout_prefix + "2", "system:playback_2")
         disconnect_jack_ports(self.jack_hwout_prefix + "1", "mod-peakmeter:in_3")
         disconnect_jack_ports(self.jack_hwout_prefix + "2", "mod-peakmeter:in_4")
 
     def unmute(self):
-        connect_jack_ports(self.jack_hwout_prefix + "1", "system:playback_1")
-        connect_jack_ports(self.jack_hwout_prefix + "2", "system:playback_2")
         connect_jack_ports(self.jack_hwout_prefix + "1", "mod-peakmeter:in_3")
         connect_jack_ports(self.jack_hwout_prefix + "2", "mod-peakmeter:in_4")
 
@@ -1572,16 +1565,12 @@ class Host(object):
                 return "ttymidi:MIDI_in"
             if data[2] == "serial_midi_out":
                 return "ttymidi:MIDI_out"
-            if data[2].startswith("playback_"):
-                num = data[2].replace("playback_","",1)
-                if num in ("1", "2"):
-                    return self.jack_hwin_prefix + num
             if data[2].startswith(("audio_from_slave_", "audio_to_slave_", "midi_from_slave_", "midi_to_slave_")):
                 return "%s:%s" % (self.jack_slave_prefix, data[2])
             if data[2].startswith("nooice_capture_"):
                 num = data[2].replace("nooice_capture_","",1)
                 return "nooice%s:nooice_capture_%s" % (num, num)
-            return "system:%s" % data[2]
+            return "mod-host:%s" % data[2]
 
         instance    = "/graph/%s" % data[2]
         portsymbol  = data[3]
@@ -2252,7 +2241,7 @@ _:b%i
 
         # Ports (MIDI In)
         for port in midiportsIn:
-            sname  = port.replace("system:","",1)
+            sname  = port.replace("mod-host:","",1)
             index += 1
             ports += """
 <%s>
@@ -2269,7 +2258,7 @@ _:b%i
 
         # Ports (MIDI Out)
         for port in midiportsOut:
-            sname  = port.replace("system:","",1)
+            sname  = port.replace("mod-host:","",1)
             index += 1
             ports += """
 <%s>
@@ -2351,8 +2340,8 @@ _:b%i
             portsyms.append("serial_midi_in")
         if self.hasSerialMidiOut:
             portsyms.append("serial_midi_out")
-        portsyms += [p.replace("system:","",1) for p in midiportsIn ]
-        portsyms += [p.replace("system:","",1) for p in midiportsOut]
+        portsyms += [p.replace("mod-host:","",1) for p in midiportsIn ]
+        portsyms += [p.replace("mod-host:","",1) for p in midiportsOut]
         pbdata += "    lv2:port <%s> ;\n" % ("> ,\n             <".join(portsyms+self.audioportsIn+self.audioportsOut))
 
         # End
